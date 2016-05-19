@@ -1,120 +1,82 @@
-var { Component, Ellipse } = scene
+var { Component, Rect } = scene
 
-export default class HalfRoundrect extends Ellipse {
+var controlHandler = {
+
+  ondragmove: function(point, index, component) {
+
+    var controls = component.controls
+
+    var { left, top, width } = component.model
+    /*
+     * point의 좌표는 부모 레이어 기준의 x, y 값이다.
+     * 따라서, 도형의 회전을 감안한 좌표로의 변환이 필요하다.
+     * Transcoord시에는 point좌표가 부모까지 transcoord되어있는 상태이므로,
+     * 컴포넌트자신에 대한 transcoord만 필요하다.(마지막 파라미터를 false로).
+     */
+    var transcoorded = component.transcoordP2S(point.x, point.y)
+    var round = (transcoorded.x - left) / (width / 2) * 100
+
+    round = roundSet(round)
+
+    component.set({ round })
+  }
+}
+
+function roundSet(round){
+
+  if(round >= 100)
+    round = 100
+  else if(round <= 0)
+    round = 0
+
+  return round
+}
+
+export default class HalfRoundrect extends Rect {
 
   _draw(context) {
     var {
-      value = 0,
+      round,
       hidden = false,
-      fillStyle,
-      blankStrokeStyle,
-      cx, cy, rx, ry
+      top,left,width,height
     } = this.model;
 
+    context.beginPath()
+
+    round = roundSet(round, width, height)
+
+    if (round > 0) {
+      var widthRound = (round / 100) * (width / 2)
+      var heightRound = (round / 100) * height
+
+      context.moveTo(left + widthRound, top);
+      context.lineTo(left + width - widthRound, top);
+      context.quadraticCurveTo(left + width, top, left + width, top + heightRound);
+      context.lineTo(left + width, top + height);
+      context.lineTo(left, top + height);
+      context.lineTo(left, top + heightRound);
+      context.quadraticCurveTo(left, top, left + widthRound, top);
+
+    } else {
+      context.rect(left, top, width, height);
+    }
+
     if(!hidden){
-
-      context.translate(cx, cy)
-
-      ////  메인 원 그리기  ////
-      context.beginPath()
-      context.ellipse(0, 0, Math.abs(rx), Math.abs(ry), 0, 0, 2 * Math.PI)
-      context.ellipse(0, 0, Math.abs(rx * 0.75), Math.abs(ry * 0.75), 0, 2 * Math.PI, 0, true)  // 반대로 그리며 원을 지움.
-      
-      this.drawStroke(context)
       this.drawFill(context)
-      context.closePath()
-
-
-      ////  무늬 그리기  ////
-      context.beginPath()
-      context.moveTo(rx * 0.65, 0)
-      context.lineTo(0, ry * 0.09)
-      context.lineTo(-rx * 0.65, 0)
-      context.lineTo(0, -ry * 0.09)
-
-      context.moveTo(0, ry * 0.65)
-      context.lineTo(rx * 0.09 , 0)
-      context.lineTo(0, -ry * 0.65)
-      context.lineTo(-rx * 0.09 , 0)
-
-      context.fillStyle = fillStyle
-      context.fill()
-      context.closePath()
-
-
-      ////  텍스트 그리기  ////
-      context.beginPath()
-      context.fillStyle = 'black'
-      context.font = (rx + ry) / 13 + "px arial"
-      context.textBaseline = "middle"
-      context.textAlign = "center"
-      context.fillText('N', 0, -ry + (ry * 0.125))
-      context.fillText('S', 0, ry - (ry * 0.125))
-      context.fillText('W', -rx + (rx * 0.125), 0)
-      context.fillText('E', rx - (rx * 0.125), 0)
-
-
-      ////  바늘 그리기  ////
-      context.beginPath()
-      var ang = (value + (this._anim_alpha || 0)) / 50 * Math.PI
-      context.rotate(ang)
-
-      context.moveTo(0, -ry * 0.65)
-      context.lineTo(rx * 0.13, 0)
-      context.lineTo(-rx * 0.13, 0)
-      context.fillStyle = '#F53B3B'
-      context.fill()
-
-      context.beginPath()
-      context.moveTo(0, ry * 0.65)
-      context.lineTo(rx * 0.13, 0)
-      context.lineTo(-rx * 0.13, 0)
-      context.fillStyle = '#3DC0E8'
-      context.fill()
-
-      context.rotate(-ang)
-
-
-      ////  중앙 원 그리기  ////
-      context.beginPath()
-      context.ellipse(0, 0, Math.abs(rx * 0.15), Math.abs(ry * 0.15), 0, 0, 2 * Math.PI)
-      context.lineWidth = (rx + ry) * 0.013
-      context.strokeStyle = '#FFFFFF'
-      context.fillStyle = '#3DC0E8'
-      context.fill()
-      context.stroke()
-      context.beginPath()
-
-      context.ellipse(0, 0, Math.abs(rx * 0.06), Math.abs(ry * 0.06), 0, 0, 2 * Math.PI)
-      context.fillStyle = '#FFFFFF'
-      context.fill()
-      context.closePath()
-
-      context.translate(-cx, -cy)
+      this.drawStroke(context)
     }
   }
 
-  onchange(after, before) {
-    if(!after.hasOwnProperty('value'))
-      return
+  get controls() {
 
-    var self = this
-    var diff = after.value - before.value
+    var { left, top, width, round } = this.model;
+    round = round == undefined ? 0 : roundSet(round)
 
-    this._anim_alpha = -diff
-
-    this.animate({
-      step: function(delta) {
-        self._anim_alpha = diff * (delta - 1)
-        self.invalidate()
-      },
-      duration: 1000,
-      delta: 'elastic',
-      options: {
-        x: 2
-      },
-      ease: 'out'
-    }).start()
+    return [{
+      x: left + (width / 2) * (round / 100),
+      y: top,
+      handler: controlHandler
+    }]
   }
 }
 
