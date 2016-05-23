@@ -53,12 +53,10 @@ export default class HalfRoundrect extends Rect {
       context.lineTo(left + width - tmpRound, top);
       context.quadraticCurveTo(left + width, top, left + width, top + tmpRound);
 
-      context.lineTo(left + width, top + height - tmpRound);
-      context.quadraticCurveTo(left + width, top + height, left + width - tmpRound, top + height);
-      context.lineTo(left + tmpRound, top + height);
-      context.quadraticCurveTo(left, top + height, left, top + height - tmpRound);
+      context.lineTo(left + width, top + height);
+      context.lineTo(left, top + height);
       context.lineTo(left, top + tmpRound);
-      
+
       context.quadraticCurveTo(left, top, left + tmpRound, top);
 
     } else {
