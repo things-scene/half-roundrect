@@ -38,7 +38,6 @@ export default class HalfRoundrect extends Rect {
   _draw(context) {
     var {
       round,
-      hidden = false,
       top,left,width,height
     } = this.model;
 
@@ -63,11 +62,8 @@ export default class HalfRoundrect extends Rect {
       context.rect(left, top, width, height);
     }
 
-    if(!hidden){
-      this.drawFill(context)
-      this.drawStroke(context)
-    }
-
+    this.drawFill(context)
+    this.drawStroke(context)
   }
 
 get controls() {
