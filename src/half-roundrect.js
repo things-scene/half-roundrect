@@ -1,3 +1,7 @@
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+
 var { Component, Rect } = scene
 
 var controlHandler = {
