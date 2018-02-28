@@ -2,7 +2,7 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 
-var { Component, Rect } = scene
+import { Component, Rect } from '@hatiolab/things-scene'
 
 var controlHandler = {
 
