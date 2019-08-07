@@ -1,5 +1,3 @@
-import locales from './locales';
-
 import icon from './assets/half-round-rect.png';
 
 var templates = [{
@@ -25,6 +23,5 @@ var templates = [{
 }];
 
 export default {
-  locales,
   templates
 };
