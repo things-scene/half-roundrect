@@ -34,6 +34,10 @@ function roundSet(round, width, height) {
 }
 
 export default class HalfRoundrect extends Rect {
+  is3dish() {
+    return false
+  }
+
   _draw(context) {
     var { round, top, left, width, height } = { ...this.model, ...this.bounds }
 
